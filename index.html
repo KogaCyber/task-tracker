@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232736;
+    --border: #2e3348;
+    --text: #e8eaf0;
+    --text2: #8b90a5;
+    --accent: #6c5ce7;
+    --accent2: #a29bfe;
+    --green: #00b894;
+    --orange: #fdcb6e;
+    --red: #e17055;
+    --pink: #fd79a8;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+    animation: fadeDown 0.6s ease;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--accent2), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .header p {
+    color: var(--text2);
+    font-size: 0.95rem;
+  }
+
+  .date-bar {
+    text-align: center;
+    color: var(--text2);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Sections */
+  .section { display: none; max-width: 700px; margin: 0 auto; }
+  .section.active { display: block; animation: fadeUp 0.4s ease; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108, 92, 231, 0.1);
+  }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Input row */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .input-row input, .input-row select {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .input-row input:focus, .input-row select:focus {
+    border-color: var(--accent);
+  }
+
+  .input-row select { flex: 0.5; min-width: 100px; }
+
+  .add-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .add-btn:hover { background: var(--accent2); }
+  .add-btn:active { transform: scale(0.96); }
+
+  /* Task items */
+  .task-list { list-style: none; }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .task-item.done {
+    opacity: 0.45;
+  }
+
+  .task-item.done .task-text {
+    text-decoration: line-through;
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkbox:hover { border-color: var(--accent); }
+
+  .checkbox.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .checkbox.checked::after {
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .task-text {
+    flex: 1;
+    font-size: 0.92rem;
+  }
+
+  .task-tag {
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-work { background: rgba(108,92,231,0.2); color: var(--accent2); }
+  .tag-personal { background: rgba(253,121,168,0.2); color: var(--pink); }
+  .tag-health { background: rgba(0,184,148,0.2); color: var(--green); }
+  .tag-urgent { background: rgba(225,112,85,0.2); color: var(--red); }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    opacity: 0;
+  }
+
+  .task-item:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { color: var(--red); background: rgba(225,112,85,0.15); }
+
+  /* Priority dots */
+  .priority-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .priority-high { background: var(--red); box-shadow: 0 0 8px rgba(225,112,85,0.5); }
+  .priority-medium { background: var(--orange); }
+  .priority-low { background: var(--green); }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+    color: var(--text2);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--surface2);
+    border-radius: 50px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    transition: width 0.5s ease;
+  }
+
+  /* Weekly review */
+  .review-prompt {
+    background: linear-gradient(135deg, rgba(108,92,231,0.15), rgba(253,121,168,0.1));
+    border: 1px solid rgba(108,92,231,0.3);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .review-prompt h3 {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 8px;
+  }
+
+  .review-prompt p {
+    color: var(--text2);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.3s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text2);
+  }
+
+  .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* Quick guide */
+  .guide-step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .step-content h4 { margin-bottom: 4px; font-size: 0.95rem; }
+  .step-content p { color: var(--text2); font-size: 0.85rem; line-height: 1.5; }
+
+  /* Clear all */
+  .clear-done {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .clear-done:hover { border-color: var(--red); color: var(--red); }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.7rem; }
+    .input-row { flex-wrap: wrap; }
+    .input-row select { flex: 1; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    body { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Life Command Center</h1>
+  <p>Simple. Powerful. All in one place.</p>
+</div>
+
+<div class="date-bar" id="dateBar"></div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('today')">📋 Today</button>
+  <button class="tab" onclick="switchTab('projects')">🚀 Projects</button>
+  <button class="tab" onclick="switchTab('habits')">✨ Habits</button>
+  <button class="tab" onclick="switchTab('review')">🔄 Review</button>
+  <button class="tab" onclick="switchTab('guide')">❓ How to Use</button>
+</div>
+
+<!-- TODAY -->
+<div class="section active" id="today">
+  <div class="stats-grid" id="todayStats"></div>
+
+  <div class="card">
+    <div class="card-title">➕ Add Task</div>
+    <div class="input-row">
+      <input type="text" id="taskInput" placeholder="What needs to be done?" onkeypress="if(event.key==='Enter')addTask()">
+      <select id="taskCategory">
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+        <option value="health">Health</option>
+        <option value="urgent">Urgent</option>
+      </select>
+      <select id="taskPriority">
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Today's Tasks</h2>
+    <button class="clear-done" onclick="clearDone('tasks')">Clear done</button>
+  </div>
+
+  <ul class="task-list" id="taskList"></ul>
+  <div class="empty-state" id="taskEmpty">
+    <div class="emoji">🎯</div>
+    <p>No tasks yet. Add your first task above!</p>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <div class="card-title">📊 Today's Progress</div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="todayProgress" style="width: 0%"></div>
+    </div>
+    <p style="color: var(--text2); font-size: 0.82rem; margin-top: 8px;" id="progressText">Complete tasks to fill the bar!</p>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="section" id="projects">
+  <div class="card">
+    <div class="card-title">➕ Add Project</div>
+    <div class="input-row">
+      <input type="text" id="projectInput" placeholder="Project name..." onkeypress="if(event.key==='Enter')addProject()">
+      <input type="date" id="projectDeadline">
+      <button class="add-btn" onclick="addProject()">Add</button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Active Projects</h2>
+    <button class="clear-done" onclick="clearDone('projects')">Clear done</button>
+  </div>
+
+  <ul class="task-list" id="projectList"></ul>
+  <div class="empty-state" id="projectEmpty">
+    <div class="emoji">🚀</div>
+    <p>No projects yet. Start by adding one above!</p>
+  </div>
+</div>
+
+<!-- HABITS -->
+<div class="section" id="habits">
+  <div class="card">
+    <div class="card-title">➕ Add Habit</div>
+    <div class="input-row">
+      <input type="text" id="habitInput" placeholder="e.g., Exercise 30 min, Read, Meditate..." onkeypress="if(event.key==='Enter')addHabit()">
+      <button class="add-btn" onclick="addHabit()">Add</button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Daily Habits</h2>
+    <button class="clear-done" onclick="resetHabits()">Reset all</button>
+  </div>
+
+  <ul class="task-list" id="habitList"></ul>
+  <div class="empty-state" id="habitEmpty">
+    <div class="emoji">✨</div>
+    <p>Build good habits! Add your first one above.</p>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <div class="card-title">🔥 Habit Streak</div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="habitProgress" style="width: 0%"></div>
+    </div>
+    <p style="color: var(--text2); font-size: 0.82rem; margin-top: 8px;" id="habitProgressText">Complete your habits daily!</p>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div class="section" id="review">
+  <div class="review-prompt">
+    <h3>🔄 Weekly Review</h3>
+    <p>Take 15 minutes every week to reflect. This is the secret to staying on track.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏆 What went well this week?</div>
+    <textarea id="reviewWins" placeholder="List your wins, big or small..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🤔 What could be better?</div>
+    <textarea id="reviewImprove" placeholder="What slowed you down? What to change?"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 Top 3 priorities for next week</div>
+    <textarea id="reviewNext" placeholder="1. &#10;2. &#10;3. "></textarea>
+  </div>
+
+  <button class="add-btn" style="width: 100%; padding: 14px; margin-top: 8px;" onclick="saveReview()">Save Review</button>
+</div>
+
+<!-- GUIDE -->
+<div class="section" id="guide">
+  <div class="card">
+    <div class="card-title" style="font-family: 'Playfair Display', serif; font-size: 1.2rem;">How to Use This System</div>
+
+    <div class="guide-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Every Morning (2 min)</h4>
+        <p>Open this page. Go to "Today" tab. Add all tasks you need to do today. Set priority: High = do first, Medium = do after, Low = if time allows.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>During the Day</h4>
+        <p>Work on HIGH priority tasks first. Check them off as you complete them. Watch the progress bar fill up — it feels great!</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Track Big Projects</h4>
+        <p>Use the "Projects" tab for anything that takes more than a day. Set deadlines. Break big projects into daily tasks.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Build Habits</h4>
+        <p>Add 3-5 daily habits in the "Habits" tab (exercise, reading, water, etc). Check them off every day. Don't add too many — start small!</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Weekly Review (Every Sunday, 15 min)</h4>
+        <p>Go to "Review" tab. Write what went well, what to improve, and your top 3 priorities for next week. This one habit will change your life.</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">⭐</div>
+      <div class="step-content">
+        <h4>The Golden Rule</h4>
+        <p>If a task takes less than 2 minutes — do it NOW. Don't add it to the list. Just do it immediately.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Data
+  let data = {
+    tasks: [],
+    projects: [],
+    habits: [],
+    review: { wins: '', improve: '', next: '' }
+  };
+
+  // Load from localStorage
+  function loadData() {
+    const saved = localStorage.getItem('lifeCommandCenter');
+    if (saved) {
+      try { data = JSON.parse(saved); } catch(e) {}
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem('lifeCommandCenter', JSON.stringify(data));
+  }
+
+  // Date
+  function updateDate() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('dateBar').textContent = now.toLocaleDateString('en-US', options);
+  }
+
+  // Tabs
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Tasks
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    data.tasks.push({
+      id: Date.now(),
+      text,
+      category: document.getElementById('taskCategory').value,
+      priority: document.getElementById('taskPriority').value,
+      done: false
+    });
+
+    input.value = '';
+    saveData();
+    renderTasks();
+  }
+
+  function toggleTask(id) {
+    const task = data.tasks.find(t => t.id === id);
+    if (task) task.done = !task.done;
+    saveData();
+    renderTasks();
+  }
+
+  function deleteTask(id) {
+    data.tasks = data.tasks.filter(t => t.id !== id);
+    saveData();
+    renderTasks();
+  }
+
+  function renderTasks() {
+    const list = document.getElementById('taskList');
+    const empty = document.getElementById('taskEmpty');
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+
+    const sorted = [...data.tasks].sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+
+    if (sorted.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      list.innerHTML = sorted.map(t => `
+        <li class="task-item ${t.done ? 'done' : ''}">
+          <div class="priority-dot priority-${t.priority}"></div>
+          <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggleTask(${t.id})"></div>
+          <span class="task-text">${escHtml(t.text)}</span>
+          <span class="task-tag tag-${t.category}">${t.category}</span>
+          <button class="delete-btn" onclick="deleteTask(${t.id})">✕</button>
+        </li>
+      `).join('');
+    }
+
+    updateStats();
+  }
+
+  // Projects
+  function addProject() {
+    const input = document.getElementById('projectInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    data.projects.push({
+      id: Date.now(),
+      text,
+      deadline: document.getElementById('projectDeadline').value,
+      done: false
+    });
+
+    input.value = '';
+    document.getElementById('projectDeadline').value = '';
+    saveData();
+    renderProjects();
+  }
+
+  function toggleProject(id) {
+    const p = data.projects.find(t => t.id === id);
+    if (p) p.done = !p.done;
+    saveData();
+    renderProjects();
+  }
+
+  function deleteProject(id) {
+    data.projects = data.projects.filter(t => t.id !== id);
+    saveData();
+    renderProjects();
+  }
+
+  function renderProjects() {
+    const list = document.getElementById('projectList');
+    const empty = document.getElementById('projectEmpty');
+
+    const sorted = [...data.projects].sort((a, b) => a.done ? 1 : -1);
+
+    if (sorted.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      list.innerHTML = sorted.map(p => {
+        const deadlineText = p.deadline ? `<span style="color:var(--text2);font-size:0.78rem;">📅 ${new Date(p.deadline).toLocaleDateString('en-US', {month:'short',day:'numeric'})}</span>` : '';
+        const isOverdue = p.deadline && !p.done && new Date(p.deadline) < new Date();
+        return `
+          <li class="task-item ${p.done ? 'done' : ''}" ${isOverdue ? 'style="border-left:3px solid var(--red)"' : ''}>
+            <div class="checkbox ${p.done ? 'checked' : ''}" onclick="toggleProject(${p.id})"></div>
+            <span class="task-text">${escHtml(p.text)}</span>
+            ${deadlineText}
+            <button class="delete-btn" onclick="deleteProject(${p.id})">✕</button>
+          </li>
+        `;
+      }).join('');
+    }
+  }
+
+  // Habits
+  function addHabit() {
+    const input = document.getElementById('habitInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    data.habits.push({
+      id: Date.now(),
+      text,
+      done: false,
+      streak: 0
+    });
+
+    input.value = '';
+    saveData();
+    renderHabits();
+  }
+
+  function toggleHabit(id) {
+    const h = data.habits.find(t => t.id === id);
+    if (h) {
+      h.done = !h.done;
+      if (h.done) h.streak = (h.streak || 0) + 1;
+      else h.streak = Math.max(0, (h.streak || 0) - 1);
+    }
+    saveData();
+    renderHabits();
+  }
+
+  function deleteHabit(id) {
+    data.habits = data.habits.filter(t => t.id !== id);
+    saveData();
+    renderHabits();
+  }
+
+  function resetHabits() {
+    data.habits.forEach(h => h.done = false);
+    saveData();
+    renderHabits();
+  }
+
+  function renderHabits() {
+    const list = document.getElementById('habitList');
+    const empty = document.getElementById('habitEmpty');
+
+    if (data.habits.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      list.innerHTML = data.habits.map(h => `
+        <li class="task-item ${h.done ? 'done' : ''}">
+          <div class="checkbox ${h.done ? 'checked' : ''}" onclick="toggleHabit(${h.id})"></div>
+          <span class="task-text">${escHtml(h.text)}</span>
+          <span style="color:var(--orange);font-size:0.8rem;font-weight:700;">🔥 ${h.streak || 0}</span>
+          <button class="delete-btn" onclick="deleteHabit(${h.id})">✕</button>
+        </li>
+      `).join('');
+    }
+
+    // Habit progress
+    const total = data.habits.length;
+    const done = data.habits.filter(h => h.done).length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('habitProgress').style.width = pct + '%';
+    document.getElementById('habitProgressText').textContent = total > 0
+      ? `${done}/${total} habits done today (${pct}%)`
+      : 'Add habits to track progress!';
+  }
+
+  // Review
+  function saveReview() {
+    data.review = {
+      wins: document.getElementById('reviewWins').value,
+      improve: document.getElementById('reviewImprove').value,
+      next: document.getElementById('reviewNext').value,
+      date: new Date().toISOString()
+    };
+    saveData();
+    alert('Review saved! ✅ Great job reflecting on your week.');
+  }
+
+  function loadReview() {
+    if (data.review) {
+      document.getElementById('reviewWins').value = data.review.wins || '';
+      document.getElementById('reviewImprove').value = data.review.improve || '';
+      document.getElementById('reviewNext').value = data.review.next || '';
+    }
+  }
+
+  // Stats
+  function updateStats() {
+    const total = data.tasks.length;
+    const done = data.tasks.filter(t => t.done).length;
+    const urgent = data.tasks.filter(t => !t.done && t.priority === 'high').length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('todayStats').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--accent2)">${total}</div>
+        <div class="stat-label">Total Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--green)">${done}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--red)">${urgent}</div>
+        <div class="stat-label">High Priority</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--pink)">${pct}%</div>
+        <div class="stat-label">Progress</div>
+      </div>
+    `;
+
+    document.getElementById('todayProgress').style.width = pct + '%';
+    document.getElementById('progressText').textContent = total > 0
+      ? `${done}/${total} tasks completed (${pct}%)`
+      : 'Add tasks to track progress!';
+  }
+
+  function clearDone(type) {
+    if (type === 'tasks') {
+      data.tasks = data.tasks.filter(t => !t.done);
+      saveData();
+      renderTasks();
+    } else if (type === 'projects') {
+      data.projects = data.projects.filter(p => !p.done);
+      saveData();
+      renderProjects();
+    }
+  }
+
+  function escHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Init
+  loadData();
+  updateDate();
+  renderTasks();
+  renderProjects();
+  renderHabits();
+  loadReview();
+</script>
+
+</body>
+</html>
